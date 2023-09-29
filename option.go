@@ -62,3 +62,42 @@ func repairClient(c *ClientOptions){
 		c.maxActive = DefaultMaxActive
 	}
 }
+
+type LockOptions struct {
+	isBlock bool
+	blockWaitingSeconds int64
+	expireSeconds int64
+	watchDogMode bool
+}
+
+type LockOption func(*LockOptions)
+
+func WithBlock()LockOption{
+	return func(options *LockOptions) {
+		options.isBlock = true
+	}
+}
+
+func WithBlockWaitingSeconds(waitingSeconds int64)LockOption{
+	return func(options *LockOptions) {
+		options.blockWaitingSeconds = waitingSeconds
+	}
+}
+
+func WithExpireSeconds(expireSeconds int64)LockOption{
+	return func(options *LockOptions) {
+		options.expireSeconds = expireSeconds
+	}
+}
+
+func repairLock(options *LockOptions){
+	if options.isBlock && options.blockWaitingSeconds <= 0{
+		options.blockWaitingSeconds = 5
+	}
+	if options.expireSeconds > 0{
+		return
+	}
+
+	options.expireSeconds = DefaultLockExpireSeconds
+	options.watchDogMode = true
+}
