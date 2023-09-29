@@ -1,5 +1,7 @@
 package learn_redis_lock
 
+import "time"
+
 const (
 	DefaultIdleTimeoutSeconds = 10
 
@@ -100,4 +102,36 @@ func repairLock(options *LockOptions){
 
 	options.expireSeconds = DefaultLockExpireSeconds
 	options.watchDogMode = true
+}
+
+type RedLockOptions struct {
+	singleNodesTimeout time.Duration
+	expireDuration time.Duration
+}
+
+type RedLockOption func(*RedLockOptions)
+
+func WithSingleNodesTimeout(singleNodesTimeout time.Duration)RedLockOption{
+	return func(options *RedLockOptions) {
+		options.singleNodesTimeout = singleNodesTimeout
+	}
+}
+
+func WithExpireDuration(expireDuration time.Duration)RedLockOption{
+	return func(options *RedLockOptions) {
+		options.expireDuration = expireDuration
+	}
+}
+
+type SingleNodeConf struct {
+	NetWork string
+	Address string
+	Password string
+	Opts []ClientOption
+}
+
+func repairRedLock( options *RedLockOptions){
+	if options.singleNodesTimeout < 0{
+		options.singleNodesTimeout = DefaultSingleLockTimeout
+	}
 }
